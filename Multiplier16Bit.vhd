@@ -1,19 +1,31 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL; 
+use IEEE.NUMERIC_STD.ALL;
+
 entity Multiplier16Bit is
     Port (
-        A : in  STD_LOGIC_VECTOR(15 downto 0);
-        B : in  STD_LOGIC_VECTOR(15 downto 0);
-        Result : out  STD_LOGIC_VECTOR(31 downto 0)
+        A : in  STD_LOGIC_VECTOR(15 downto 0); -- Input operand 1
+        B : in  STD_LOGIC_VECTOR(15 downto 0); -- Input operand 2
+        Result : out STD_LOGIC_VECTOR(30 downto 0) -- Output result (31-bit)
     );
 end Multiplier16Bit;
 
 architecture Behavioral of Multiplier16Bit is
+    -- Signals for signed conversion and multiplication
+    signal signed_A : SIGNED(15 downto 0);
+    signal signed_B : SIGNED(15 downto 0);
+    signal signed_Product : SIGNED(30 downto 0);
+
 begin
-    process(A, B)
-    begin
-        -- Konversi A dan B ke tipe unsigned sebelum dikalikan
-        Result <= std_logic_vector(unsigned(A) * unsigned(B));
-    end process;
+    -- Convert inputs to signed
+    signed_A <= SIGNED(A);
+    signed_B <= SIGNED(B);
+
+    -- Perform multiplication
+    signed_Product <= signed_A * signed_B;
+
+    -- Assign result to output
+    Result <= STD_LOGIC_VECTOR(signed_Product);
+
 end Behavioral;
+
