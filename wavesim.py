@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-def float_to_fixed_16bit(value, integer_bits=15, fractional_bits=16):
+def float_to_fixed_32bit(value, integer_bits=15, fractional_bits=16):
     scale = 2**fractional_bits
     max_val = 2**(integer_bits + fractional_bits) - 1
     min_val = -(2**(integer_bits + fractional_bits))
@@ -11,9 +11,16 @@ def float_to_fixed_16bit(value, integer_bits=15, fractional_bits=16):
         fixed_value = max_val
     elif fixed_value < min_val:
         fixed_value = min_val
-    fixed_value = fixed_value & 0xFFFF  # Keep 32 bits
+    fixed_value = fixed_value & 0xFFFF_FFFF  # Keep 32 bits
     # Convert to 32-bit binary string with leading zeros
-    return format(fixed_value & 0xFFFF, '016b')
+    return format(fixed_value & 0xFFFF_FFFF, '032b')
+
+def float_to_fixed_16bit(value, integer_bits=7, fractional_bits=8):
+    scale = 2**fractional_bits
+    max_val = 2**(integer_bits + fractional_bits - 1) - 1
+    min_val = -2**(integer_bits + fractional_bits - 1)
+    fixed_value = int(value * scale)
+    return format(max(min(fixed_value, max_val), min_val) & 0xFFFF, '016b')
 
 # Parameters for the sine wave
 amplitude = 1  # Peak value
@@ -57,7 +64,7 @@ print(f'Hasil pertambahan: {float_to_fixed_16bit(sum)}')
 
 divres = (sum/samples_to_store)*2
 
-print(divres)
+print(float_to_fixed_32bit(divres))
 result = math.acos(divres)
 degree_result = math.degrees(result)
 
