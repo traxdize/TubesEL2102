@@ -44,12 +44,12 @@ y1_samples = sine_wave1[:samples_to_store]
 y2_samples = sine_wave2[:samples_to_store]
 
 print("y1_samples (First sine wave):")
-for i, sample in enumerate(y1_samples, start=1):
-    print(f"Sample {i}: {float_to_fixed_16bit(sample)}")
+for i, sample in enumerate(y1_samples, start=0):
+    print(f"force -freeze sim:/fixed_point_accumulator/x({i}) {float_to_fixed_16bit(sample)} 0")
 
 print("\ny2_samples (Second sine wave):")
-for i, sample in enumerate(y2_samples, start=1):
-    print(f"Sample {i}: {float_to_fixed_16bit(sample)}")
+for i, sample in enumerate(y2_samples, start=0):
+    print(f"force -freeze sim:/fixed_point_accumulator/y({i}) {float_to_fixed_16bit(sample)} 0")
 
 # Pair the data
 paired_data = list(zip(y1_samples, y2_samples))
@@ -60,11 +60,11 @@ for i, (y1, y2) in enumerate(paired_data):
     multiplication = y1*y2
     sum += multiplication
 
-print(f'Hasil pertambahan: {float_to_fixed_16bit(sum)}')
+print(f'Hasil pertambahan: {(sum)}')
 
 divres = (sum/samples_to_store)*2
 
-print(float_to_fixed_32bit(divres))
+print((divres))
 result = math.acos(divres)
 degree_result = math.degrees(result)
 
