@@ -82,7 +82,7 @@ begin
                     state <= X_FINAL;
                 
                 when X_FINAL =>
-                    x_fourth <= x4(47 downto 16); -- SLICER 16 BIT
+                    x_fourth <= x4(47 downto 16); -- SLICER 32 BIT
                     state <= CALC_Y;
                 
                 when CALC_Y =>
