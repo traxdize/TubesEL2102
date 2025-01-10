@@ -32,7 +32,7 @@ begin
     -- process yang mengamati perubahan di selector
     process (Sel, data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8)
     begin
-        -- jika selector bernilai 1, maka data B yang diteruskan ke luaran.
+        -- jika selector bernilai 1, maka data yang diteruskan ke luaran.
         if    (Sel = 0001) then
                 Data <= data_1;
         elsif (Sel = 0010) then
@@ -48,7 +48,7 @@ begin
         elsif (Sel = 0111) then
                 Data <= data_7;
         elsif (Sel = 1000) then
-                Data <= data_8;
+                Data <= data_8; 
         else
         -- jika selector tidak valid, maka 0000 yang diteruskan ke luaran.
             Data <= 0000;
