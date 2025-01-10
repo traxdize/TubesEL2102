@@ -68,28 +68,28 @@ begin
                 when INIT =>
                     if start = '1' then
                         x_reg <= x_input;
-                        x2 <= x_input * x_input;
+                        x2 <= x_input * x_input; -- MULTIPLIER 32 X 32 BIT
                         state <= X_SQUARE;
                         done_cordic <= '0'; 
                     end if;
                 
                 when X_SQUARE =>
-                    x_squared <= x2(47 downto 16); -- Scale back to fixed-point
+                    x_squared <= x2(47 downto 16); -- Scale back to fixed-point -- SLICER 16 BIT, KALAU ADA YANG NIAT BIKIN, BIKIN AJA
                     state <= X_FOUR;
 
                 when X_FOUR =>
-                    x4 <= x_squared * x_squared;
+                    x4 <= x_squared * x_squared; -- MULTIPLIER 32 X 32 BIT
                     state <= X_FINAL;
                 
                 when X_FINAL =>
-                    x_fourth <= x4(47 downto 16);
+                    x_fourth <= x4(47 downto 16); -- SLICER 16 BIT
                     state <= CALC_Y;
                 
                 when CALC_Y =>
-                    -- Calculate sqrt(1-x^2) approximation
+                    -- Aproksimasi untuk akar (1-x**2)
                     temp_y := ONE;
-                    temp_y := temp_y - shift_right(x_squared, 1);
-                    temp_y := temp_y - shift_right(x_fourth, 3);
+                    temp_y := temp_y - shift_right(x_squared, 1); -- 1 BIT RIGHT-SHIFTER dan 32 BIT SUBSTRACTOR
+                    temp_y := temp_y - shift_right(x_fourth, 3); -- 3 BIT RIGHT-SHIFTER dan 32 BIT SUBSTRACTOR
                     
                     y_reg <= temp_y;
                     z_reg <= PI_OVER_2;
@@ -105,29 +105,29 @@ begin
 
                 when CORDIC_MULT1 =>
                     -- Perform multiplications
-                    xy_temp <= y_reg * to_signed(d, 32);
-                    yx_temp <= x_reg * to_signed(d, 32);
-                    atan_temp <= ATAN_TABLE(iteration_count) * to_signed(d, 32);
+                    xy_temp <= y_reg * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
+                    yx_temp <= x_reg * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
+                    atan_temp <= ATAN_TABLE(iteration_count) * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
                     state <= CORDIC_SHIFT;
 
                 when CORDIC_SHIFT =>
                     -- Apply shifts
-                    x_shift <= shift_right(xy_temp, iteration_count)(31 downto 0);
+                    x_shift <= shift_right(xy_temp, iteration_count)(31 downto 0); -- Ini ignore aja
                     y_shift <= shift_right(yx_temp, iteration_count)(31 downto 0);
                     state <= CORDIC_ADD;
 
                 when CORDIC_ADD =>
                     -- Update x, y, and z registers
-                    x_reg <= x_reg - x_shift;
-                    y_reg <= y_reg + y_shift;
-                    z_reg <= z_reg - atan_temp(31 downto 0);
+                    x_reg <= x_reg - x_shift; -- 32 BIT SUBSTRACTOR
+                    y_reg <= y_reg + y_shift; -- 32 BIT ADDER
+                    z_reg <= z_reg - atan_temp(31 downto 0); -- 32 BIT SUBSTRACTOR
 
                     -- Prepare for next iteration
                     if iteration_count = 15 then
                         state <= DONE_STATE;
                     else
                         iteration_count <= iteration_count + 1;
-                        if (x_reg - x_shift) >= 0 then
+                        if (x_reg - x_shift) >= 0 then -- ini biarin aja
                             d <= 1;
                         else
                             d <= -1;
