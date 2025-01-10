@@ -47,7 +47,7 @@ begin
                     done_reg <= '0';
 
                 when COMPUTE_PRODUCTS =>
-                    products(index) <= x(index) * y(index);
+                    products(index) <= x(index) * y(index); -- 16 BIT MULTIPLIER
                     if index = 7 then
                         index <= 0;
                         state <= ACCUMULATE;
@@ -59,13 +59,13 @@ begin
                     sum <= sum + products(index);
                     if index = 7 then
                         state <= FINISHED;
-                        temp_result <= sum + products(index);  -- Include last product
+                        temp_result <= sum + products(index);  -- Include last product -- 32 BIT ADDER
                     else
                         index <= index + 1;
                     end if;
                 
                 when FINISHED =>
-                    result <= shift_right(temp_result, 2);
+                    result <= shift_right(temp_result, 2); -- RIGHT SHIFTER 2 BIT
                     done_reg <= '1';  -- Set done to indicate completion
                     -- Stay in FINISHED state until reset goes low
                     if reset = '0' then
