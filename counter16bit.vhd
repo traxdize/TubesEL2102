@@ -9,12 +9,12 @@ entity counter16bit is
         En : in std_logic;
         Res : in std_logic;
         Clk : in std_logic;
-        Count : out std_logic_vector(15 downto 0)
+        Count : out integer;
     );
 end counter16bit;
 
 architecture behavioral of counter16bit is
-    signal Count_temp : integer range 0 to 255;
+    signal Count_temp : integer range 0 to 255 := 0;
 begin
     process(Clk)
     begin
@@ -28,5 +28,5 @@ begin
             end if;
         end if;
     end process;
-    Count <= std_logic_vector(to_unsigned(Count_temp, 16));
+    Count <= Count_temp;
 end architecture behavioral;
