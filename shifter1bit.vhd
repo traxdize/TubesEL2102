@@ -13,5 +13,6 @@ end shifter1bit;
 
 architecture behavioral of shifter1bit is
 begin
-	output_data <= shift_right(signed(input_data), 1);
+	output_data(30 downto 0) <= input_data(31 downto 1);
+	output_data(31) <= '0';
 end behavioral;
