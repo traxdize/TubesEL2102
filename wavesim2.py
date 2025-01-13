@@ -28,7 +28,7 @@ frequency = 60  # Frequency in Hz
 duration = 1   # Duration in seconds
 samples_to_store = 8
 sampling_rate = frequency*samples_to_store  # Number of samples per second
-phase_difference = math.radians(45)  # Phase difference in radians (e.g., π/4 = 45 degrees)
+phase_difference = math.radians(89)  # Phase difference in radians (e.g., π/4 = 45 degrees)
 
 # Generate time values
 t = np.linspace(0, duration, sampling_rate, endpoint=False)
@@ -45,11 +45,11 @@ y2_samples = sine_wave2[:samples_to_store]
 
 print("y1_samples (First sine wave):")
 for i, sample in enumerate(y1_samples, start=0):
-    print(f"force -freeze sim:/fixed_point_accumulator/x({i}) {float_to_fixed_16bit(sample)} 0")
+    print(f"force -freeze sim:/cordicphase/r_memory({i*2+1}) {float_to_fixed_16bit(sample)} 0")
 
 print("\ny2_samples (Second sine wave):")
 for i, sample in enumerate(y2_samples, start=0):
-    print(f"force -freeze sim:/fixed_point_accumulator/y({i}) {float_to_fixed_16bit(sample)} 0")
+    print(f"force -freeze sim:/cordicphase/r_memory({i*2}) {float_to_fixed_16bit(sample)} 0")
 
 # Pair the data
 paired_data = list(zip(y1_samples, y2_samples))
