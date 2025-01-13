@@ -14,6 +14,15 @@ entity inverse_cordic is
 end inverse_cordic;
 
 architecture behavior of inverse_cordic is
+    -- Component declaration for 32-bit multiplier
+    component Multiplier32Bit is
+        Port ( 
+            a : in signed(31 downto 0);
+            b : in signed(31 downto 0);
+            product : out signed(63 downto 0)
+        );
+    end component;
+
     type state_type is (INIT, X_SQUARE, X_FOUR, X_FINAL, CALC_Y, 
                        CORDIC_MULT1, CORDIC_SHIFT, CORDIC_ADD, DONE_STATE);
     signal state               : state_type;
@@ -28,6 +37,13 @@ architecture behavior of inverse_cordic is
     signal x_shift, y_shift : signed(31 downto 0);
     signal d : integer;
     
+    -- Signals for multiplier inputs
+    signal mult1_a, mult1_b : signed(31 downto 0);
+    signal mult2_a, mult2_b : signed(31 downto 0);
+    signal mult3_a, mult3_b : signed(31 downto 0);
+    signal mult4_a, mult4_b : signed(31 downto 0);
+    signal mult5_a, mult5_b : signed(31 downto 0);
+
     type atan_array is array (0 to 15) of signed(31 downto 0);
     constant ATAN_TABLE : atan_array := (
         x"002D0000",  -- atan(1)
@@ -52,6 +68,37 @@ architecture behavior of inverse_cordic is
     constant PI_OVER_2 : signed(31 downto 0) := x"005A0000";
 
 begin
+    -- Instantiate multipliers
+    mult_x2: Multiplier32Bit port map (
+        a => mult1_a,
+        b => mult1_b,
+        product => x2
+    );
+
+    mult_x4: Multiplier32Bit port map (
+        a => mult2_a,
+        b => mult2_b,
+        product => x4
+    );
+
+    mult_xy: Multiplier32Bit port map (
+        a => mult3_a,
+        b => mult3_b,
+        product => xy_temp
+    );
+
+    mult_yx: Multiplier32Bit port map (
+        a => mult4_a,
+        b => mult4_b,
+        product => yx_temp
+    );
+
+    mult_atan: Multiplier32Bit port map (
+        a => mult5_a,
+        b => mult5_b,
+        product => atan_temp
+    );
+
     process(clk, reset)
         variable temp_y: signed(31 downto 0);
     begin
@@ -68,17 +115,19 @@ begin
                 when INIT =>
                     if start = '1' then
                         x_reg <= x_input;
-                        x2 <= x_input * x_input; -- MULTIPLIER 32 X 32 BIT
+                        mult1_a <= x_input;
+                        mult1_b <= x_input; -- MULTIPLIER 32 X 32 BIT
                         state <= X_SQUARE;
                         done_cordic <= '0'; 
                     end if;
                 
                 when X_SQUARE =>
                     x_squared <= x2(47 downto 16); -- Scale back to fixed-point -- SLICER 16 BIT, KALAU ADA YANG NIAT BIKIN, BIKIN AJA
+                    mult2_a <= x_squared;
+                    mult2_b <= x_squared; -- MULTIPLIER 32 X 32 BIT
                     state <= X_FOUR;
 
                 when X_FOUR =>
-                    x4 <= x_squared * x_squared; -- MULTIPLIER 32 X 32 BIT
                     state <= X_FINAL;
                 
                 when X_FINAL =>
@@ -105,9 +154,12 @@ begin
 
                 when CORDIC_MULT1 =>
                     -- Perform multiplications
-                    xy_temp <= y_reg * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
-                    yx_temp <= x_reg * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
-                    atan_temp <= ATAN_TABLE(iteration_count) * to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
+                    mult3_a <= y_reg;
+                    mult3_b <= to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
+                    mult4_a <= x_reg;
+                    mult4_b <= to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
+                    mult5_a <= ATAN_TABLE(iteration_count);
+                    mult5_b <= to_signed(d, 32); -- MULTIPLIER 32 X 32 BIT
                     state <= CORDIC_SHIFT;
 
                 when CORDIC_SHIFT =>
