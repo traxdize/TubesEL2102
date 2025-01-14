@@ -57,6 +57,14 @@ architecture behavior of inverse_cordic is
     signal mult4_a, mult4_b : signed(31 downto 0);
     signal mult5_a, mult5_b : signed(31 downto 0);
 
+    -- Signals for shifter output
+    signal x_squared_out : signed(31 downto 0);
+
+    -- Signals for subtractor outputs
+    signal subtract_temp_y : signed(31 downto 0);
+    signal subtract_x_reg : signed(31 downto 0);
+    signal subtract_z_reg : signed(31 downto 0);
+
     type atan_array is array (0 to 15) of signed(31 downto 0);
     constant ATAN_TABLE : atan_array := (
         x"002D0000",  -- atan(1)
